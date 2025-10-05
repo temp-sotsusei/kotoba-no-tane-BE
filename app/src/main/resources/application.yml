@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: app
+  datasource:
+    url: ${APP_DATASOURCE_URL:jdbc:postgresql://postgres:5432/app}
+    username: ${APP_DATASOURCE_USERNAME:app}
+    password: ${APP_DATASOURCE_PASSWORD:app}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations:
+      - classpath:db/migration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${APP_AUTH0_ISSUER:https://example.auth0.com/}
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+logging:
+  level:
+    com.example.app: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+app:
+  auth0:
+    audience: ${APP_AUTH0_AUDIENCE:}
+    domain: ${APP_AUTH0_DOMAIN:}

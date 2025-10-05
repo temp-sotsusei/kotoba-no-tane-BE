@@ -1,0 +1,37 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      APP_DATASOURCE_URL: jdbc:postgresql://postgres:5432/app
+      APP_DATASOURCE_USERNAME: app
+      APP_DATASOURCE_PASSWORD: app
+      APP_AUTH0_ISSUER: ${APP_AUTH0_ISSUER:-https://example.auth0.com/}
+      APP_AUTH0_AUDIENCE: ${APP_AUTH0_AUDIENCE:-https://api.example.com/}
+      APP_AUTH0_DOMAIN: ${APP_AUTH0_DOMAIN:-example.auth0.com}
+    ports:
+      - '${APP_PORT:-8080}:8080'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U app -d app']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
