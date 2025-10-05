@@ -1,0 +1,36 @@
+# 作業用ドキュメント（Git 管理対象外）
+docs/internal/
+
+# OS が生成する不要ファイル
+.DS_Store
+Thumbs.db
+
+# エディタ / IDE 関連
+.idea/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+
+# Gradle のキャッシュ・ビルド成果物
+.gradle/
+**/.gradle/
+**/build/
+**/out/
+**/bin/
+
+# ログや一時ファイル
+*.log
+*.tmp
+*.swp
+*.swo
+
+# 環境変数ファイル（サンプル以外は無視）
+.env
+.env.*
+!.env.example
+
+# Node / npm が生成するディレクトリ
+node_modules/

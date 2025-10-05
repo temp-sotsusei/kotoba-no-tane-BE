@@ -1,0 +1,10 @@
+# Build outputs
+app/build/
+app/.gradle/
+
+# Local docs that stay untracked
+docs/internal/
+
+# Node/Gradle caches
+node_modules/
+.gradle/
