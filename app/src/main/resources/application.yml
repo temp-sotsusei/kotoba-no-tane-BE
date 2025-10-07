@@ -39,5 +39,6 @@ management:
 
 app:
   auth0:
+    issuer: ${APP_AUTH0_ISSUER:https://example.auth0.com/}
     audience: ${APP_AUTH0_AUDIENCE:}
     domain: ${APP_AUTH0_DOMAIN:}

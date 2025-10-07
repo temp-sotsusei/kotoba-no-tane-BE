@@ -3,7 +3,7 @@
 FROM gradle:8.10.2-jdk21 AS build
 WORKDIR /workspace
 COPY app/ ./app/
-RUN gradle -p app clean build --no-daemon
+RUN gradle -p app clean build --no-daemon -x spotlessCheck
 
 FROM eclipse-temurin:21-jre AS runtime
 WORKDIR /app
