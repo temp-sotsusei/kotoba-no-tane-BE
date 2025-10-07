@@ -23,11 +23,14 @@ Spring Boot (Java 21) backend for the temp-sotsusei project. Auth0 を利用し�
 - 保存時：VS Code で `editor.formatOnSave` を有効化済み
   - Java → Red Hat Java フォーマッタ
   - Markdown / YAML / JSON → Prettier（`.prettierrc`）
-- 一括整形：`app\gradlew.bat spotlessApply`
 - 保存時と整形コマンドの設定を統一しているため、コミット前に改めて整形しても差分がぶれません
 - java 以外一括整形`npx prettier --write . --config .prettierrc --ignore-path .prettierignore`
 - java 一括整形
 - `.\app\gradlew.bat -p app spotlessApply`
+
+## テスト用 JWT ルート
+
+- `GET /test_jwt` に `Authorization: Bearer <Base64化したJWT>` を付けて呼び出すと、デコード済みのトークン内容を確認できます（開発・検証専用）。
 
 ## 今後追加する内容
 
