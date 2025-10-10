@@ -2,7 +2,7 @@ spring:
   application:
     name: app
   datasource:
-    url: ${APP_DATASOURCE_URL:jdbc:postgresql://postgres:5432/app}
+    url: ${APP_DATASOURCE_URL:jdbc:postgresql://${APP_DATASOURCE_HOST:postgres}:${APP_DATASOURCE_PORT:5432}/${APP_DATASOURCE_DB:app}${APP_DATASOURCE_QUERY:?sslmode=disable}}
     username: ${APP_DATASOURCE_USERNAME:app}
     password: ${APP_DATASOURCE_PASSWORD:app}
     driver-class-name: org.postgresql.Driver

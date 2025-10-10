@@ -47,3 +47,9 @@ Spring Boot (Java 21) backend for the temp-sotsusei project. Auth0 を利用し�
 - その他は `docs/internal/directory_overview.md` を参照
 
 必要に応じて項目を詳細化していく予定です。
+
+## dev API メモ
+
+- `SPRING_PROFILES_ACTIVE=dev` を設定して起動した場合のみ `/api/crud/**` と `/api/test/**` を使用可能。
+- `/api/crud/users` や `/api/crud/user` は開発用データ操作向け。
+- `/api/test/test_jwt` は JWT の内容確認、`/api/test/test_user` は `sub` に基づくユーザー取得/作成テスト。
