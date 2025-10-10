@@ -29,7 +29,7 @@ spring:
 
 logging:
   level:
-    com.example.app: INFO
+    io.github.tempsotsusei.kotobanotane: INFO
 
 management:
   endpoints:
