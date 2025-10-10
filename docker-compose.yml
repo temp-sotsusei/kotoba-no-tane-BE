@@ -4,12 +4,16 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      APP_DATASOURCE_URL: jdbc:postgresql://postgres:5432/app
-      APP_DATASOURCE_USERNAME: app
-      APP_DATASOURCE_PASSWORD: app
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-default}
       APP_AUTH0_ISSUER: ${APP_AUTH0_ISSUER:-https://example.auth0.com/}
       APP_AUTH0_AUDIENCE: ${APP_AUTH0_AUDIENCE:-https://api.example.com/}
       APP_AUTH0_DOMAIN: ${APP_AUTH0_DOMAIN:-example.auth0.com}
+      APP_DATASOURCE_HOST: ${APP_DATASOURCE_HOST:-postgres}
+      APP_DATASOURCE_PORT: ${APP_DATASOURCE_PORT:-5432}
+      APP_DATASOURCE_DB: ${APP_DATASOURCE_DB:-app}
+      APP_DATASOURCE_USERNAME: ${APP_DATASOURCE_USERNAME:-app}
+      APP_DATASOURCE_PASSWORD: ${APP_DATASOURCE_PASSWORD:-app}
+      APP_DATASOURCE_QUERY: ${APP_DATASOURCE_QUERY:-?sslmode=disable}
     ports:
       - '${APP_PORT:-8080}:8080'
     depends_on:
