@@ -42,3 +42,10 @@ app:
     issuer: ${APP_AUTH0_ISSUER:https://example.auth0.com/}
     audience: ${APP_AUTH0_AUDIENCE:}
     domain: ${APP_AUTH0_DOMAIN:}
+  openai:
+    openai-base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
+    openai-api-key: ${OPENAI_API_KEY:}
+    openai-model: ${OPENAI_MODEL:gpt-4o-mini}
+    openai-timeout: ${OPENAI_TIMEOUT:30}
+    default-max-output-tokens: ${OPENAI_DEFAULT_MAX_OUTPUT_TOKENS:1000}
+    max-attempts: ${OPENAI_MAX_ATTEMPTS:5}
