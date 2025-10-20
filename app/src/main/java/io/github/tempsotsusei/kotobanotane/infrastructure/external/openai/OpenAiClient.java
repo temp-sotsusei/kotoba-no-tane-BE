@@ -66,9 +66,7 @@ public class OpenAiClient {
     payload.put("text", textConfig);
 
     int resolvedMaxOutputTokens =
-        request
-            .optionalMaxOutputTokens()
-            .orElse(properties.defaultMaxOutputTokens());
+        request.optionalMaxOutputTokens().orElse(properties.defaultMaxOutputTokens());
     payload.put("max_output_tokens", resolvedMaxOutputTokens);
 
     int maxAttempts = Math.max(1, properties.maxAttempts());

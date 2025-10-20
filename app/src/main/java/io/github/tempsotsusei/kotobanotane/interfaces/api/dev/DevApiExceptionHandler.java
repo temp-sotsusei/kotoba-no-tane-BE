@@ -20,10 +20,7 @@ public class DevApiExceptionHandler {
   public ResponseEntity<ErrorResponse> handleOpenAiClientException(OpenAiClientException ex) {
     log.warn("OpenAI client error: {}", ex.getMessage(), ex);
     ErrorResponse body =
-        new ErrorResponse(
-            "LLM サービスの応答に遅延が発生しています。時間を置いて再実行してください。",
-            "LLM-001",
-            true);
+        new ErrorResponse("LLM サービスの応答に遅延が発生しています。時間を置いて再実行してください。", "LLM-001", true);
     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(body);
   }
 
