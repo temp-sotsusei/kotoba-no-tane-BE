@@ -1,11 +1,11 @@
 package io.github.tempsotsusei.kotobanotane.interfaces.api.dev;
 
 import io.github.tempsotsusei.kotobanotane.application.thumbnail.ThumbnailService;
+import io.github.tempsotsusei.kotobanotane.config.time.TimeProvider;
 import io.github.tempsotsusei.kotobanotane.domain.thumbnail.Thumbnail;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import java.time.Instant;
 import java.util.List;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -35,16 +35,21 @@ public class DevThumbnailCrudController {
   /** サムネイル関連処理を担うサービス。 */
   private final ThumbnailService thumbnailService;
 
+  private final TimeProvider timeProvider;
+
   /** DI されたサービスを利用して処理を実行する。 */
-  public DevThumbnailCrudController(ThumbnailService thumbnailService) {
+  public DevThumbnailCrudController(ThumbnailService thumbnailService, TimeProvider timeProvider) {
     this.thumbnailService = thumbnailService;
+    this.timeProvider = timeProvider;
   }
 
   /** サムネイルを全件取得する。 */
   @GetMapping("/thumbnails")
   @PreAuthorize("permitAll()")
   public List<ThumbnailResponse> list() {
-    return thumbnailService.findAll().stream().map(ThumbnailResponse::from).toList();
+    return thumbnailService.findAll().stream()
+        .map(thumbnail -> ThumbnailResponse.from(thumbnail, timeProvider))
+        .toList();
   }
 
   /** サムネイルを 1 件取得する。 */
@@ -53,7 +58,7 @@ public class DevThumbnailCrudController {
   public ResponseEntity<ThumbnailResponse> get(@PathVariable String thumbnailId) {
     return thumbnailService
         .findById(thumbnailId)
-        .map(ThumbnailResponse::from)
+        .map(thumbnail -> ThumbnailResponse.from(thumbnail, timeProvider))
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
   }
@@ -64,7 +69,8 @@ public class DevThumbnailCrudController {
   public ResponseEntity<ThumbnailResponse> create(@Valid @RequestBody ThumbnailRequest request) {
     Thumbnail created = thumbnailService.create(request.thumbnailPath());
     // 作成結果を 201 応答で返却し、クライアントに新規登録が成功したことを伝える
-    return ResponseEntity.status(HttpStatus.CREATED).body(ThumbnailResponse.from(created));
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(ThumbnailResponse.from(created, timeProvider));
   }
 
   /** 既存サムネイルを更新する。 */
@@ -74,7 +80,7 @@ public class DevThumbnailCrudController {
       @PathVariable String thumbnailId, @Valid @RequestBody ThumbnailRequest request) {
     return thumbnailService
         .update(thumbnailId, request.thumbnailPath())
-        .map(ThumbnailResponse::from)
+        .map(thumbnail -> ThumbnailResponse.from(thumbnail, timeProvider))
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
   }
@@ -93,15 +99,15 @@ public class DevThumbnailCrudController {
 
   /** レスポンスとして返却する DTO。 */
   public record ThumbnailResponse(
-      String thumbnailId, String thumbnailPath, Instant createdAt, Instant updatedAt) {
+      String thumbnailId, String thumbnailPath, String createdAt, String updatedAt) {
 
     /** ドメインモデルからレスポンスを生成する。 */
-    static ThumbnailResponse from(Thumbnail thumbnail) {
+    static ThumbnailResponse from(Thumbnail thumbnail, TimeProvider timeProvider) {
       return new ThumbnailResponse(
           thumbnail.thumbnailId(),
           thumbnail.thumbnailPath(),
-          thumbnail.createdAt(),
-          thumbnail.updatedAt());
+          timeProvider.formatIso(thumbnail.createdAt()),
+          timeProvider.formatIso(thumbnail.updatedAt()));
     }
   }
 }

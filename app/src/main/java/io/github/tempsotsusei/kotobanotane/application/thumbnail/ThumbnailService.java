@@ -1,6 +1,7 @@
 package io.github.tempsotsusei.kotobanotane.application.thumbnail;
 
 import io.github.tempsotsusei.kotobanotane.application.uuid.UuidGeneratorService;
+import io.github.tempsotsusei.kotobanotane.config.time.TimeProvider;
 import io.github.tempsotsusei.kotobanotane.domain.thumbnail.Thumbnail;
 import io.github.tempsotsusei.kotobanotane.domain.thumbnail.ThumbnailRepository;
 import java.time.Instant;
@@ -19,16 +20,23 @@ public class ThumbnailService {
   /** 時系列ソート可能な UUID を生成する内部サービス。 */
   private final UuidGeneratorService uuidGeneratorService;
 
+  /** 指定されたタイムゾーンで現在時刻を返すプロバイダ。 */
+  private final TimeProvider timeProvider;
+
   /**
    * DI により依存を受け取り、サービス層の処理に活用する。
    *
    * @param thumbnailRepository サムネイルリポジトリ
    * @param uuidGeneratorService UUID 生成サービス
+   * @param timeProvider タイムゾーン対応の現在時刻プロバイダ
    */
   public ThumbnailService(
-      ThumbnailRepository thumbnailRepository, UuidGeneratorService uuidGeneratorService) {
+      ThumbnailRepository thumbnailRepository,
+      UuidGeneratorService uuidGeneratorService,
+      TimeProvider timeProvider) {
     this.thumbnailRepository = thumbnailRepository;
     this.uuidGeneratorService = uuidGeneratorService;
+    this.timeProvider = timeProvider;
   }
 
   /**
@@ -58,7 +66,7 @@ public class ThumbnailService {
    */
   @Transactional
   public Thumbnail create(String thumbnailPath) {
-    Instant now = Instant.now();
+    Instant now = timeProvider.nowInstant();
     // UUID v7 を利用して時系列順に並べられる ID を採番する
     String thumbnailId = uuidGeneratorService.generateV7();
     Thumbnail thumbnail = new Thumbnail(thumbnailId, thumbnailPath, now, now);
@@ -74,12 +82,10 @@ public class ThumbnailService {
    */
   @Transactional
   public Optional<Thumbnail> update(String thumbnailId, String thumbnailPath) {
+    Instant updatedAt = timeProvider.nowInstant();
     return thumbnailRepository
         .findById(thumbnailId)
-        // createdAt は維持しつつ、新しいパスと更新日時を反映させる
-        .map(
-            existing ->
-                new Thumbnail(thumbnailId, thumbnailPath, existing.createdAt(), Instant.now()))
+        .map(existing -> new Thumbnail(thumbnailId, thumbnailPath, existing.createdAt(), updatedAt))
         .map(thumbnailRepository::save);
   }
 

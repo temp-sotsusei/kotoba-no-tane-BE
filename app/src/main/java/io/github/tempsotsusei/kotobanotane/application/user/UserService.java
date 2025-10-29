@@ -1,5 +1,6 @@
 package io.github.tempsotsusei.kotobanotane.application.user;
 
+import io.github.tempsotsusei.kotobanotane.config.time.TimeProvider;
 import io.github.tempsotsusei.kotobanotane.domain.user.User;
 import io.github.tempsotsusei.kotobanotane.domain.user.UserRepository;
 import java.time.Instant;
@@ -13,9 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   private final UserRepository userRepository;
+  private final TimeProvider timeProvider;
 
-  public UserService(UserRepository userRepository) {
+  public UserService(UserRepository userRepository, TimeProvider timeProvider) {
     this.userRepository = userRepository;
+    this.timeProvider = timeProvider;
   }
 
   public List<User> findAll() {
@@ -33,9 +36,10 @@ public class UserService {
 
   @Transactional
   public Optional<User> update(String auth0Id) {
+    Instant updatedAt = timeProvider.nowInstant();
     return userRepository
         .findById(auth0Id)
-        .map(existing -> new User(auth0Id, existing.createdAt(), Instant.now()))
+        .map(existing -> new User(auth0Id, existing.createdAt(), updatedAt))
         .map(userRepository::save);
   }
 
@@ -45,7 +49,7 @@ public class UserService {
   }
 
   private User createInternal(String auth0Id) {
-    Instant now = Instant.now();
+    Instant now = timeProvider.nowInstant();
     User user = new User(auth0Id, now, now);
     return userRepository.save(user);
   }

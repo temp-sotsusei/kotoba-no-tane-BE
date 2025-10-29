@@ -1,10 +1,10 @@
 package io.github.tempsotsusei.kotobanotane.interfaces.api.dev;
 
 import io.github.tempsotsusei.kotobanotane.application.user.UserService;
+import io.github.tempsotsusei.kotobanotane.config.time.TimeProvider;
 import io.github.tempsotsusei.kotobanotane.domain.user.User;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import java.time.Instant;
 import java.util.List;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -28,16 +28,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class DevUserCrudController {
 
   private final UserService userService;
+  private final TimeProvider timeProvider;
 
-  public DevUserCrudController(UserService userService) {
+  public DevUserCrudController(UserService userService, TimeProvider timeProvider) {
     this.userService = userService;
+    this.timeProvider = timeProvider;
   }
 
   /** 全ユーザーを取得する。 */
   @GetMapping("/users")
   @PreAuthorize("permitAll()")
   public List<UserResponse> list() {
-    return userService.findAll().stream().map(UserResponse::from).toList();
+    return userService.findAll().stream()
+        .map(user -> UserResponse.from(user, timeProvider))
+        .toList();
   }
 
   /** 単一ユーザーを取得する。 */
@@ -46,7 +50,7 @@ public class DevUserCrudController {
   public ResponseEntity<UserResponse> get(@PathVariable String auth0Id) {
     return userService
         .findById(auth0Id)
-        .map(UserResponse::from)
+        .map(user -> UserResponse.from(user, timeProvider))
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
   }
@@ -56,7 +60,7 @@ public class DevUserCrudController {
   @PreAuthorize("permitAll()")
   public ResponseEntity<UserResponse> create(@Valid @RequestBody UserRequest request) {
     User created = userService.create(request.auth0Id());
-    return ResponseEntity.status(HttpStatus.CREATED).body(UserResponse.from(created));
+    return ResponseEntity.status(HttpStatus.CREATED).body(UserResponse.from(created, timeProvider));
   }
 
   /** ユーザーの更新日時を更新する。 */
@@ -65,7 +69,7 @@ public class DevUserCrudController {
   public ResponseEntity<UserResponse> update(@PathVariable String auth0Id) {
     return userService
         .update(auth0Id)
-        .map(UserResponse::from)
+        .map(user -> UserResponse.from(user, timeProvider))
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
   }
@@ -82,10 +86,13 @@ public class DevUserCrudController {
   public record UserRequest(@NotBlank String auth0Id) {}
 
   /** レスポンス表現。 */
-  public record UserResponse(String auth0Id, Instant createdAt, Instant updatedAt) {
+  public record UserResponse(String auth0Id, String createdAt, String updatedAt) {
 
-    static UserResponse from(User user) {
-      return new UserResponse(user.auth0Id(), user.createdAt(), user.updatedAt());
+    static UserResponse from(User user, TimeProvider timeProvider) {
+      return new UserResponse(
+          user.auth0Id(),
+          timeProvider.formatIso(user.createdAt()),
+          timeProvider.formatIso(user.updatedAt()));
     }
   }
 }

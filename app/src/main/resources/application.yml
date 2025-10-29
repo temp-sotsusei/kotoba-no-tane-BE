@@ -26,6 +26,8 @@ spring:
     multipart:
       max-file-size: 20MB
       max-request-size: 20MB
+  jackson:
+    time-zone: ${APP_TIME_ZONE:Asia/Tokyo}
 
 logging:
   level:
@@ -54,3 +56,5 @@ app:
     openai-timeout: ${OPENAI_TIMEOUT:30}
     default-max-output-tokens: ${OPENAI_DEFAULT_MAX_OUTPUT_TOKENS:1000}
     max-attempts: ${OPENAI_MAX_ATTEMPTS:5}
+  time:
+    zone: ${APP_TIME_ZONE:Asia/Tokyo}
