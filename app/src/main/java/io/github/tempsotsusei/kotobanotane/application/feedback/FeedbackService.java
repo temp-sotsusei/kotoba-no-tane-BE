@@ -105,7 +105,8 @@ public class FeedbackService {
     }
 
     Instant updatedAt = timeProvider.nowInstant();
-    return new Feedback(existing.feedbackId(), nextChapterId, nextFeedback, existing.createdAt(), updatedAt);
+    return new Feedback(
+        existing.feedbackId(), nextChapterId, nextFeedback, existing.createdAt(), updatedAt);
   }
 
   private void ensureChapterExists(String chapterId) {
