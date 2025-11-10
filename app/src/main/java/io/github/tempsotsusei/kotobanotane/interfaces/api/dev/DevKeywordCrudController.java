@@ -65,8 +65,7 @@ public class DevKeywordCrudController {
   @PreAuthorize("permitAll()")
   public ResponseEntity<KeywordResponse> create(@Valid @RequestBody KeywordCreateRequest request) {
     Keyword created =
-        keywordService.create(
-            request.chapterId(), request.keyword(), request.keywordPosition());
+        keywordService.create(request.chapterId(), request.keyword(), request.keywordPosition());
     return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(created));
   }
 

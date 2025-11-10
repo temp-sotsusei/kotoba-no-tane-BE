@@ -62,7 +62,8 @@ public class DevFeedbackCrudController {
   /** フィードバックを新規作成する。 */
   @PostMapping("/feedback")
   @PreAuthorize("permitAll()")
-  public ResponseEntity<FeedbackResponse> create(@Valid @RequestBody FeedbackCreateRequest request) {
+  public ResponseEntity<FeedbackResponse> create(
+      @Valid @RequestBody FeedbackCreateRequest request) {
     Feedback created = feedbackService.create(request.chapterId(), request.feedback());
     return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(created));
   }
@@ -78,7 +79,10 @@ public class DevFeedbackCrudController {
 
     FeedbackUpdateCommand command =
         new FeedbackUpdateCommand(
-            request.chapterIdSpecified(), request.chapterId(), request.feedbackSpecified(), request.feedback());
+            request.chapterIdSpecified(),
+            request.chapterId(),
+            request.feedbackSpecified(),
+            request.feedback());
 
     return feedbackService
         .update(feedbackId, command)

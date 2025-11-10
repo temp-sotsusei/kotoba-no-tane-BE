@@ -29,7 +29,11 @@ public final class KeywordMapper {
   }
 
   public static KeywordEntity toEntityForUpdate(
-      KeywordEntity entity, String chapterId, String keywordValue, int keywordPosition, Instant updatedAt) {
+      KeywordEntity entity,
+      String chapterId,
+      String keywordValue,
+      int keywordPosition,
+      Instant updatedAt) {
     entity.updateDetails(chapterId, keywordValue, keywordPosition, updatedAt);
     return entity;
   }

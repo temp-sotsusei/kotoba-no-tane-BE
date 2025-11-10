@@ -18,7 +18,6 @@ import io.github.tempsotsusei.kotobanotane.domain.story.Story;
 import io.github.tempsotsusei.kotobanotane.domain.thumbnail.Thumbnail;
 import java.util.HashMap;
 import java.util.Map;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,9 +141,12 @@ class DevKeywordCrudControllerTest {
                             .content(
                                 objectMapper.writeValueAsString(
                                     Map.of(
-                                        "chapterId", baseChapterId,
-                                        "keyword", "initial",
-                                        "keywordPosition", 1))))
+                                        "chapterId",
+                                        baseChapterId,
+                                        "keyword",
+                                        "initial",
+                                        "keywordPosition",
+                                        1))))
                     .andExpect(status().isCreated())
                     .andReturn()
                     .getResponse()
