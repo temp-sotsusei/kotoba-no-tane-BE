@@ -3,6 +3,7 @@ package io.github.tempsotsusei.kotobanotane.application.llm;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -13,6 +14,7 @@ import io.github.tempsotsusei.kotobanotane.infrastructure.external.openai.OpenAi
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 class KeywordListsGenerationServiceTest {
@@ -49,6 +51,27 @@ class KeywordListsGenerationServiceTest {
   void generateThrowsForBlankInput() {
     // 入力が空文字の場合に例外が送出されることを確認する。
     assertThatThrownBy(() -> service.generate(" ")).isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
+  void generateInitialKeywordsUsesRandomizedPrompt() {
+    ObjectNode response = objectMapper.createObjectNode();
+    ArrayNode keywords = objectMapper.createArrayNode();
+    keywords.add(arrayOf("あお", "あか", "きいろ", "みどり"));
+    keywords.add(arrayOf("そら", "うみ", "ほし", "つき"));
+    keywords.add(arrayOf("はる", "なつ", "あき", "ふゆ"));
+    response.set("keywords", keywords);
+
+    when(openAiClient.requestStructuredJson(any(OpenAiStructuredRequest.class)))
+        .thenReturn(response);
+
+    List<List<String>> lists = service.generateInitialKeywords();
+
+    assertThat(lists).hasSize(3);
+    ArgumentCaptor<OpenAiStructuredRequest> captor =
+        ArgumentCaptor.forClass(OpenAiStructuredRequest.class);
+    verify(openAiClient).requestStructuredJson(captor.capture());
+    assertThat(captor.getValue().userInput()).contains("seed=");
   }
 
   private JsonNode arrayOf(String... values) {

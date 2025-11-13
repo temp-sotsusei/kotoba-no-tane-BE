@@ -7,6 +7,7 @@ import io.github.tempsotsusei.kotobanotane.infrastructure.external.openai.OpenAi
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -15,10 +16,18 @@ import org.springframework.util.StringUtils;
 public class KeywordListsGenerationService {
 
   private static final String SYSTEM_PROMPT =
-      "あなたは4〜12歳の子ども向けに日本語文章からキーワードセットを抽出するアシスタントです。"
+      "あなたは4〜6歳の子ども向けに日本語文章からキーワードセットを抽出するアシスタントです。"
           + "各セットは「関連しそうな単語2つ」と「関連が薄い単語2つ」の計4語で構成してください。"
           + "すべての単語はひらがなで、可能であれば10文字以内に収めてください。"
           + "セットは必ず3つ返し、JSON配列以外の出力は行わないでください。";
+
+  private static final String INITIAL_USER_PROMPT_TEMPLATE =
+      """
+			これは章本文が存在しない初回サジェスト用の依頼です。seed=%s
+			子どもがワクワクするようなテーマや季節、感情、小さな発見などを自由に想像し、
+			それぞれのセットに関連語2つ・無関係な遊び心ある単語2つを混ぜてください。
+			ひらがな・10文字以内を守りつつ、毎回違う切り口になるよう意識してください。
+			""";
 
   private static final int MAX_OUTPUT_TOKENS = 2000;
 
@@ -43,6 +52,19 @@ public class KeywordListsGenerationService {
 
     JsonNode response = openAiClient.requestStructuredJson(request);
     return convertToList(response);
+  }
+
+  /**
+   * 初回サジェスト用に、章本文なしでキーワードを生成する。
+   *
+   * <p>毎回 seed を変えて LLM にランダム性を持たせる。
+   *
+   * @return 生成されたキーワードセット
+   */
+  public List<List<String>> generateInitialKeywords() {
+    String seed = UUID.randomUUID().toString();
+    String prompt = INITIAL_USER_PROMPT_TEMPLATE.formatted(seed);
+    return generate(prompt);
   }
 
   private JsonNode buildKeywordObjectSchema() {
