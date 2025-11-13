@@ -29,6 +29,13 @@ public class StoryRepositoryImpl implements StoryRepository {
   }
 
   @Override
+  public List<Story> findAllByAuth0UserIdOrderByCreatedAtDesc(String auth0UserId) {
+    return storyJpaRepository.findByAuth0UserIdOrderByCreatedAtDesc(auth0UserId).stream()
+        .map(StoryMapper::toDomain)
+        .toList();
+  }
+
+  @Override
   @Transactional
   public Story save(Story story) {
     StoryEntity entity =

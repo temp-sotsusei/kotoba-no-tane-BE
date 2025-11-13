@@ -1,5 +1,6 @@
 package io.github.tempsotsusei.kotobanotane.domain.thumbnail;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +25,14 @@ public interface ThumbnailRepository {
    * @return サムネイルの一覧
    */
   List<Thumbnail> findAll();
+
+  /**
+   * 複数 ID のサムネイルをまとめて取得する。
+   *
+   * @param thumbnailIds 取得対象の ID 群
+   * @return 見つかったサムネイル一覧
+   */
+  List<Thumbnail> findAllByIds(Collection<String> thumbnailIds);
 
   /**
    * サムネイルを新規作成または更新する。
