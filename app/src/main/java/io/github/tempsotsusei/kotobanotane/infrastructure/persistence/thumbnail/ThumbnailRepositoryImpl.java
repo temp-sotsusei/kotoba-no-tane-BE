@@ -2,6 +2,7 @@ package io.github.tempsotsusei.kotobanotane.infrastructure.persistence.thumbnail
 
 import io.github.tempsotsusei.kotobanotane.domain.thumbnail.Thumbnail;
 import io.github.tempsotsusei.kotobanotane.domain.thumbnail.ThumbnailRepository;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
@@ -28,6 +29,17 @@ public class ThumbnailRepositoryImpl implements ThumbnailRepository {
   @Override
   public List<Thumbnail> findAll() {
     return thumbnailJpaRepository.findAll().stream().map(ThumbnailMapper::toDomain).toList();
+  }
+
+  /** 指定 ID 群のサムネイルをまとめて取得する。 */
+  @Override
+  public List<Thumbnail> findAllByIds(Collection<String> thumbnailIds) {
+    if (thumbnailIds == null || thumbnailIds.isEmpty()) {
+      return List.of();
+    }
+    return thumbnailJpaRepository.findAllById(thumbnailIds).stream()
+        .map(ThumbnailMapper::toDomain)
+        .toList();
   }
 
   /**
