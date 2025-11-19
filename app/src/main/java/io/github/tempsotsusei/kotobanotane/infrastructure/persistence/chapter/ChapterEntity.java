@@ -1,10 +1,13 @@
 package io.github.tempsotsusei.kotobanotane.infrastructure.persistence.chapter;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /** chapters テーブルに対応する JPA エンティティ。 */
 @Entity
@@ -24,9 +27,10 @@ public class ChapterEntity {
   @Column(name = "chapter_num", nullable = false)
   private int chapterNum;
 
-  /** 章本文。 */
-  @Column(name = "chapter_text", nullable = false, columnDefinition = "TEXT")
-  private String chapterText;
+  /** 章本文(JSON)。 */
+  @Column(name = "chapter_json", nullable = false, columnDefinition = "jsonb")
+  @JdbcTypeCode(SqlTypes.JSON)
+  private JsonNode chapterJson;
 
   /** 作成日時。 */
   @Column(name = "created_at", nullable = false)
@@ -43,13 +47,13 @@ public class ChapterEntity {
       String chapterId,
       String storyId,
       int chapterNum,
-      String chapterText,
+      JsonNode chapterJson,
       Instant createdAt,
       Instant updatedAt) {
     this.chapterId = chapterId;
     this.storyId = storyId;
     this.chapterNum = chapterNum;
-    this.chapterText = chapterText;
+    this.chapterJson = chapterJson;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
   }
@@ -66,8 +70,8 @@ public class ChapterEntity {
     return chapterNum;
   }
 
-  public String getChapterText() {
-    return chapterText;
+  public JsonNode getChapterJson() {
+    return chapterJson;
   }
 
   public Instant getCreatedAt() {
@@ -83,14 +87,14 @@ public class ChapterEntity {
    *
    * @param newStoryId 更新後の story ID
    * @param newChapterNum 更新後の章番号
-   * @param newChapterText 更新後の本文
+   * @param newChapterJson 更新後の JSON
    * @param newUpdatedAt 更新日時
    */
   public void updateDetails(
-      String newStoryId, int newChapterNum, String newChapterText, Instant newUpdatedAt) {
+      String newStoryId, int newChapterNum, JsonNode newChapterJson, Instant newUpdatedAt) {
     this.storyId = newStoryId;
     this.chapterNum = newChapterNum;
-    this.chapterText = newChapterText;
+    this.chapterJson = newChapterJson;
     this.updatedAt = newUpdatedAt;
   }
 }

@@ -1,5 +1,6 @@
 package io.github.tempsotsusei.kotobanotane.infrastructure.persistence.chapter;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.github.tempsotsusei.kotobanotane.domain.chapter.Chapter;
 import java.time.Instant;
 
@@ -13,7 +14,7 @@ public final class ChapterMapper {
         entity.getChapterId(),
         entity.getStoryId(),
         entity.getChapterNum(),
-        entity.getChapterText(),
+        entity.getChapterJson(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }
@@ -23,14 +24,18 @@ public final class ChapterMapper {
         chapter.chapterId(),
         chapter.storyId(),
         chapter.chapterNum(),
-        chapter.chapterText(),
+        chapter.chapterJson(),
         chapter.createdAt(),
         chapter.updatedAt());
   }
 
   public static ChapterEntity toEntityForUpdate(
-      ChapterEntity entity, String storyId, int chapterNum, String chapterText, Instant updatedAt) {
-    entity.updateDetails(storyId, chapterNum, chapterText, updatedAt);
+      ChapterEntity entity,
+      String storyId,
+      int chapterNum,
+      JsonNode chapterJson,
+      Instant updatedAt) {
+    entity.updateDetails(storyId, chapterNum, chapterJson, updatedAt);
     return entity;
   }
 }

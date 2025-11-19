@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.github.tempsotsusei.kotobanotane.application.story.StoryService;
 import io.github.tempsotsusei.kotobanotane.application.thumbnail.ThumbnailService;
 import io.github.tempsotsusei.kotobanotane.application.user.UserService;
@@ -57,10 +58,11 @@ class DevChapterCrudControllerTest {
 
   @Test
   void performsCrudCycle() throws Exception {
+    ObjectNode chapterJson = objectMapper.createObjectNode().put("body", "First scene");
     Map<String, Object> createRequest = new HashMap<>();
     createRequest.put("storyId", baseStoryId);
     createRequest.put("chapterNum", 1);
-    createRequest.put("chapterText", "First scene");
+    createRequest.put("chapterJson", chapterJson);
 
     // Create
     MvcResult createResult =
@@ -72,7 +74,7 @@ class DevChapterCrudControllerTest {
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.storyId").value(baseStoryId))
             .andExpect(jsonPath("$.chapterNum").value(1))
-            .andExpect(jsonPath("$.chapterText").value("First scene"))
+            .andExpect(jsonPath("$.chapterJson.body").value("First scene"))
             .andReturn();
 
     Map<String, Object> created =
@@ -92,9 +94,10 @@ class DevChapterCrudControllerTest {
         .andExpect(jsonPath("$.storyId").value(baseStoryId));
 
     // Update
+    ObjectNode updatedJson = objectMapper.createObjectNode().put("body", "Second scene");
     Map<String, Object> updateRequest = new HashMap<>();
     updateRequest.put("chapterNum", 2);
-    updateRequest.put("chapterText", "Second scene");
+    updateRequest.put("chapterJson", updatedJson);
     updateRequest.put("storyId", secondaryStoryId);
 
     mockMvc
@@ -104,7 +107,7 @@ class DevChapterCrudControllerTest {
                 .content(objectMapper.writeValueAsString(updateRequest)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.chapterNum").value(2))
-        .andExpect(jsonPath("$.chapterText").value("Second scene"))
+        .andExpect(jsonPath("$.chapterJson.body").value("Second scene"))
         .andExpect(jsonPath("$.storyId").value(secondaryStoryId));
 
     // Delete
@@ -113,10 +116,11 @@ class DevChapterCrudControllerTest {
 
   @Test
   void returnsBadRequestWhenStoryDoesNotExist() throws Exception {
+    ObjectNode chapterJson = objectMapper.createObjectNode().put("body", "Body");
     Map<String, Object> createRequest = new HashMap<>();
     createRequest.put("storyId", "non-existent-story");
     createRequest.put("chapterNum", 1);
-    createRequest.put("chapterText", "Body");
+    createRequest.put("chapterJson", chapterJson);
 
     mockMvc
         .perform(
@@ -127,7 +131,7 @@ class DevChapterCrudControllerTest {
   }
 
   @Test
-  void rejectsBlankChapterTextOnUpdate() throws Exception {
+  void rejectsNullChapterJsonOnUpdate() throws Exception {
     String chapterId =
         objectMapper
             .readTree(
@@ -142,8 +146,10 @@ class DevChapterCrudControllerTest {
                                         baseStoryId,
                                         "chapterNum",
                                         3,
-                                        "chapterText",
-                                        "Original text"))))
+                                        "chapterJson",
+                                        objectMapper
+                                            .createObjectNode()
+                                            .put("body", "Original text")))))
                     .andExpect(status().isCreated())
                     .andReturn()
                     .getResponse()
@@ -155,7 +161,7 @@ class DevChapterCrudControllerTest {
         .perform(
             put("/api/crud/chapter/" + chapterId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(Map.of("chapterText", ""))))
+                .content("{\"chapterJson\": null}"))
         .andExpect(status().isBadRequest());
   }
 }

@@ -1,6 +1,7 @@
 package io.github.tempsotsusei.kotobanotane.interfaces.api.dev;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import io.github.tempsotsusei.kotobanotane.application.chapter.ChapterService;
 import io.github.tempsotsusei.kotobanotane.application.chapter.ChapterUpdateCommand;
 import io.github.tempsotsusei.kotobanotane.config.time.TimeProvider;
@@ -8,6 +9,7 @@ import io.github.tempsotsusei.kotobanotane.domain.chapter.Chapter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -65,7 +67,7 @@ public class DevChapterCrudController {
   @PreAuthorize("permitAll()")
   public ResponseEntity<ChapterResponse> create(@Valid @RequestBody ChapterCreateRequest request) {
     Chapter created =
-        chapterService.create(request.storyId(), request.chapterNum(), request.chapterText());
+        chapterService.create(request.storyId(), request.chapterNum(), request.chapterJson());
     return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(created));
   }
 
@@ -84,8 +86,8 @@ public class DevChapterCrudController {
             request.storyId(),
             request.chapterNumSpecified(),
             request.chapterNum(),
-            request.chapterTextSpecified(),
-            request.chapterText());
+            request.chapterJsonSpecified(),
+            request.chapterJson());
 
     return chapterService
         .update(chapterId, command)
@@ -107,14 +109,14 @@ public class DevChapterCrudController {
         chapter.chapterId(),
         chapter.storyId(),
         chapter.chapterNum(),
-        chapter.chapterText(),
+        chapter.chapterJson(),
         timeProvider.formatIso(chapter.createdAt()),
         timeProvider.formatIso(chapter.updatedAt()));
   }
 
   /** 章作成リクエスト。 */
   public record ChapterCreateRequest(
-      @NotBlank String storyId, @Min(1) int chapterNum, @NotBlank String chapterText) {}
+      @NotBlank String storyId, @Min(1) int chapterNum, @NotNull JsonNode chapterJson) {}
 
   /** 章更新リクエスト。 */
   public static class ChapterUpdateRequest {
@@ -123,8 +125,8 @@ public class DevChapterCrudController {
     private boolean storyIdSpecified;
     private Integer chapterNum;
     private boolean chapterNumSpecified;
-    private String chapterText;
-    private boolean chapterTextSpecified;
+    private JsonNode chapterJson;
+    private boolean chapterJsonSpecified;
 
     @JsonProperty("storyId")
     public void setStoryId(String storyId) {
@@ -138,10 +140,10 @@ public class DevChapterCrudController {
       this.chapterNumSpecified = true;
     }
 
-    @JsonProperty("chapterText")
-    public void setChapterText(String chapterText) {
-      this.chapterText = chapterText;
-      this.chapterTextSpecified = true;
+    @JsonProperty("chapterJson")
+    public void setChapterJson(JsonNode chapterJson) {
+      this.chapterJson = chapterJson;
+      this.chapterJsonSpecified = true;
     }
 
     public String storyId() {
@@ -152,8 +154,8 @@ public class DevChapterCrudController {
       return chapterNum;
     }
 
-    public String chapterText() {
-      return chapterText;
+    public JsonNode chapterJson() {
+      return chapterJson;
     }
 
     public boolean storyIdSpecified() {
@@ -164,12 +166,12 @@ public class DevChapterCrudController {
       return chapterNumSpecified;
     }
 
-    public boolean chapterTextSpecified() {
-      return chapterTextSpecified;
+    public boolean chapterJsonSpecified() {
+      return chapterJsonSpecified;
     }
 
     boolean isEmpty() {
-      return !storyIdSpecified && !chapterNumSpecified && !chapterTextSpecified;
+      return !storyIdSpecified && !chapterNumSpecified && !chapterJsonSpecified;
     }
   }
 
@@ -178,7 +180,7 @@ public class DevChapterCrudController {
       String chapterId,
       String storyId,
       int chapterNum,
-      String chapterText,
+      JsonNode chapterJson,
       String createdAt,
       String updatedAt) {}
 }

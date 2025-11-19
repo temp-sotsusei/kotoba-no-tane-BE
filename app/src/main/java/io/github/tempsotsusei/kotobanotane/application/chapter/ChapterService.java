@@ -1,5 +1,6 @@
 package io.github.tempsotsusei.kotobanotane.application.chapter;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.github.tempsotsusei.kotobanotane.application.uuid.UuidGeneratorService;
 import io.github.tempsotsusei.kotobanotane.config.time.TimeProvider;
 import io.github.tempsotsusei.kotobanotane.domain.chapter.Chapter;
@@ -7,6 +8,7 @@ import io.github.tempsotsusei.kotobanotane.domain.chapter.ChapterRepository;
 import io.github.tempsotsusei.kotobanotane.domain.story.StoryRepository;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -62,16 +64,18 @@ public class ChapterService {
    *
    * @param storyId 紐付ける story ID
    * @param chapterNum 章番号
-   * @param chapterText 本文
+   * @param chapterJson 本文 JSON
    * @return 作成した章
    */
   @Transactional
-  public Chapter create(String storyId, int chapterNum, String chapterText) {
+  public Chapter create(String storyId, int chapterNum, JsonNode chapterJson) {
     ensureStoryExists(storyId);
+    JsonNode normalizedJson = requireChapterJson(chapterJson);
 
     Instant now = timeProvider.nowInstant();
     Chapter chapter =
-        new Chapter(uuidGeneratorService.generateV7(), storyId, chapterNum, chapterText, now, now);
+        new Chapter(
+            uuidGeneratorService.generateV7(), storyId, chapterNum, normalizedJson, now, now);
     return chapterRepository.save(chapter);
   }
 
@@ -121,13 +125,10 @@ public class ChapterService {
       nextChapterNum = candidate;
     }
 
-    String nextChapterText = existing.chapterText();
-    if (command.chapterTextSpecified()) {
-      String candidate = command.chapterText();
-      if (!StringUtils.hasText(candidate)) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "chapterText must not be blank");
-      }
-      nextChapterText = candidate;
+    JsonNode nextChapterJson = existing.chapterJson();
+    if (command.chapterJsonSpecified()) {
+      JsonNode candidate = command.chapterJson();
+      nextChapterJson = requireChapterJson(candidate);
     }
 
     Instant updatedAt = timeProvider.nowInstant();
@@ -135,7 +136,7 @@ public class ChapterService {
         existing.chapterId(),
         nextStoryId,
         nextChapterNum,
-        nextChapterText,
+        nextChapterJson,
         existing.createdAt(),
         updatedAt);
   }
@@ -146,5 +147,13 @@ public class ChapterService {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, "storyId does not exist: " + storyId);
     }
+  }
+
+  private JsonNode requireChapterJson(JsonNode chapterJson) {
+    JsonNode candidate = Objects.requireNonNull(chapterJson, "chapterJson must not be null");
+    if (candidate.isNull()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "chapterJson must not be null");
+    }
+    return candidate;
   }
 }

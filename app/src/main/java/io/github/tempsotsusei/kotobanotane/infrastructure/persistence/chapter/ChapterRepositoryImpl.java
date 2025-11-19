@@ -40,7 +40,7 @@ public class ChapterRepositoryImpl implements ChapterRepository {
                         existing,
                         chapter.storyId(),
                         chapter.chapterNum(),
-                        chapter.chapterText(),
+                        chapter.chapterJson(),
                         chapter.updatedAt()))
             .orElse(ChapterMapper.toEntity(chapter));
 
