@@ -49,7 +49,9 @@ class DevFeedbackCrudControllerTest {
     userService.findOrCreate(auth0Id);
     Thumbnail thumbnail = thumbnailService.create("/path/to/feedback-thumb.png");
     Story story = storyService.create(auth0Id, "Feedback Story", thumbnail.thumbnailId());
-    Chapter chapter = chapterService.create(story.storyId(), 1, "Feedback chapter");
+    com.fasterxml.jackson.databind.node.ObjectNode chapterJson =
+        objectMapper.createObjectNode().put("body", "Feedback chapter");
+    Chapter chapter = chapterService.create(story.storyId(), 1, chapterJson);
     chapterId = chapter.chapterId();
   }
 

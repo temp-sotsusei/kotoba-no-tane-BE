@@ -1,5 +1,6 @@
 package io.github.tempsotsusei.kotobanotane.domain.chapter;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
 
 /**
@@ -11,6 +12,6 @@ public record Chapter(
     String chapterId,
     String storyId,
     int chapterNum,
-    String chapterText,
+    JsonNode chapterJson,
     Instant createdAt,
     Instant updatedAt) {}
