@@ -7,8 +7,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import io.github.tempsotsusei.kotobanotane.application.auth.AuthenticatedTokenService;
 import io.github.tempsotsusei.kotobanotane.application.story.StoryChapterNextService;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -40,7 +42,14 @@ class StoryChapterNextControllerTest {
 
   @Autowired private MockMvc mockMvc;
 
+  @MockBean private AuthenticatedTokenService authenticatedTokenService;
   @MockBean private StoryChapterNextService storyChapterNextService;
+
+  @BeforeEach
+  void setUp() {
+    when(authenticatedTokenService.extractAuth0Id(any())).thenReturn("auth0|user");
+    when(authenticatedTokenService.requireExistingAuth0Id("auth0|user")).thenReturn("auth0|user");
+  }
 
   /** JWT 付きリクエストでキーワード配列が返る正常系を検証する。 */
   @Test

@@ -42,7 +42,9 @@ public class CalendarStoryController {
   @GetMapping
   @PreAuthorize("isAuthenticated()")
   public List<CalendarStoryResponse> list(JwtAuthenticationToken authentication) {
-    String auth0Id = authenticatedTokenService.extractAuth0Id(authentication.getToken());
+    String auth0Id =
+        authenticatedTokenService.requireExistingAuth0Id(
+            authenticatedTokenService.extractAuth0Id(authentication.getToken()));
     return calendarStoriesQueryService.fetchByAuth0UserId(auth0Id).stream()
         .map(this::toResponse)
         .toList();

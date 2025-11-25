@@ -2,11 +2,13 @@ package io.github.tempsotsusei.kotobanotane.interfaces.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+import io.github.tempsotsusei.kotobanotane.application.auth.AuthenticatedTokenService;
 import io.github.tempsotsusei.kotobanotane.application.story.StoryChapterNextService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,9 +23,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/story/chapter/next")
 public class StoryChapterNextController {
 
+  private final AuthenticatedTokenService authenticatedTokenService;
   private final StoryChapterNextService storyChapterNextService;
 
-  public StoryChapterNextController(StoryChapterNextService storyChapterNextService) {
+  public StoryChapterNextController(
+      AuthenticatedTokenService authenticatedTokenService,
+      StoryChapterNextService storyChapterNextService) {
+    this.authenticatedTokenService = authenticatedTokenService;
     this.storyChapterNextService = storyChapterNextService;
   }
 
@@ -36,7 +42,9 @@ public class StoryChapterNextController {
   @PostMapping
   @PreAuthorize("isAuthenticated()")
   public List<List<String>> generateNextKeywords(
-      @Valid @RequestBody StoryChapterNextRequest request) {
+      @Valid @RequestBody StoryChapterNextRequest request, JwtAuthenticationToken authentication) {
+    authenticatedTokenService.requireExistingAuth0Id(
+        authenticatedTokenService.extractAuth0Id(authentication.getToken()));
     return storyChapterNextService.generateNextChapterKeywords(request.chapterJson());
   }
 
