@@ -5,9 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+import io.github.tempsotsusei.kotobanotane.application.user.UserService;
+import io.github.tempsotsusei.kotobanotane.domain.user.User;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,6 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 class AuthenticatedTokenServiceTest {
 
   @Mock private JwtDecoder jwtDecoder;
+  @Mock private UserService userService;
 
   @InjectMocks private AuthenticatedTokenService authenticatedTokenService;
 
@@ -62,6 +66,29 @@ class AuthenticatedTokenServiceTest {
         assertThrows(
             ResponseStatusException.class,
             () -> authenticatedTokenService.validateAndExtract("  "));
+
+    assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
+  }
+
+  @Test
+  void requireExistingAuth0IdReturnsWhenUserExists() {
+    Instant now = Instant.now();
+    when(userService.findById("auth0|exists"))
+        .thenReturn(Optional.of(new User("auth0|exists", now, now)));
+
+    String result = authenticatedTokenService.requireExistingAuth0Id("auth0|exists");
+
+    assertThat(result).isEqualTo("auth0|exists");
+  }
+
+  @Test
+  void requireExistingAuth0IdThrowsWhenUserMissing() {
+    when(userService.findById("auth0|missing")).thenReturn(Optional.empty());
+
+    ResponseStatusException exception =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> authenticatedTokenService.requireExistingAuth0Id("auth0|missing"));
 
     assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
   }
