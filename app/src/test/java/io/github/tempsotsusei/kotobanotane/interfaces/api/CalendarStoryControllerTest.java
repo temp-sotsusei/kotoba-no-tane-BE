@@ -1,11 +1,14 @@
 package io.github.tempsotsusei.kotobanotane.interfaces.api;
 
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import io.github.tempsotsusei.kotobanotane.application.auth.AuthenticatedTokenService;
 import io.github.tempsotsusei.kotobanotane.domain.story.Story;
 import io.github.tempsotsusei.kotobanotane.domain.story.StoryRepository;
 import io.github.tempsotsusei.kotobanotane.domain.thumbnail.Thumbnail;
@@ -18,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -33,15 +37,21 @@ class CalendarStoryControllerTest {
   @Autowired private StoryJpaRepository storyJpaRepository;
   @Autowired private ThumbnailJpaRepository thumbnailJpaRepository;
 
+  @MockBean private AuthenticatedTokenService authenticatedTokenService;
+
   @BeforeEach
   void setUp() {
     storyJpaRepository.deleteAll();
     thumbnailJpaRepository.deleteAll();
   }
 
+  /** JWT 付きでカレンダーストーリー一覧を取得できることを確認する。 */
   @Test
   void returnsCalendarStoriesForAuthenticatedUser() throws Exception {
     String auth0Id = "auth0|calendar";
+    when(authenticatedTokenService.extractAuth0Id(any())).thenReturn(auth0Id);
+    when(authenticatedTokenService.requireExistingAuth0Id(auth0Id)).thenReturn(auth0Id);
+
     Instant createdLatest = Instant.parse("2025-03-02T10:15:30Z");
     Instant createdOld = Instant.parse("2025-02-28T08:00:00Z");
 
@@ -62,6 +72,7 @@ class CalendarStoryControllerTest {
         .andExpect(jsonPath("$[1].thumbnailPath").value(nullValue()));
   }
 
+  /** JWT なしリクエストが 401 で弾かれることを確認する。 */
   @Test
   void returnsUnauthorizedWithoutJwt() throws Exception {
     mockMvc.perform(get("/api/calendar/stories")).andExpect(status().isUnauthorized());
