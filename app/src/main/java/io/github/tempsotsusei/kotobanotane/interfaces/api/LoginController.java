@@ -4,7 +4,7 @@ import io.github.tempsotsusei.kotobanotane.application.auth.LoginApplicationServ
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,7 +25,7 @@ public class LoginController {
    * @param authentication Spring Security が解決した JWT 認証情報
    * @return 200 OK（ボディなし）
    */
-  @GetMapping
+  @PostMapping
   @PreAuthorize("isAuthenticated()")
   public ResponseEntity<Void> login(JwtAuthenticationToken authentication) {
     loginApplicationService.login(authentication.getToken());

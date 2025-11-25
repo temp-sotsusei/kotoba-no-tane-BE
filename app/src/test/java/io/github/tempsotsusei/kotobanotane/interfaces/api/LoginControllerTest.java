@@ -1,7 +1,7 @@
 package io.github.tempsotsusei.kotobanotane.interfaces.api;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.Test;
@@ -22,19 +22,19 @@ class LoginControllerTest {
   @Test
   void returnsOkWhenJwtSubjectPresent() throws Exception {
     mockMvc
-        .perform(get("/api/login").with(jwt().jwt(jwt -> jwt.subject("auth0|login"))))
+        .perform(post("/api/login").with(jwt().jwt(jwt -> jwt.subject("auth0|login"))))
         .andExpect(status().isOk());
   }
 
   @Test
   void returnsBadRequestWhenSubjectBlank() throws Exception {
     mockMvc
-        .perform(get("/api/login").with(jwt().jwt(jwt -> jwt.claim("sub", ""))))
+        .perform(post("/api/login").with(jwt().jwt(jwt -> jwt.claim("sub", ""))))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   void returnsUnauthorizedWhenTokenMissing() throws Exception {
-    mockMvc.perform(get("/api/login")).andExpect(status().isUnauthorized());
+    mockMvc.perform(post("/api/login")).andExpect(status().isUnauthorized());
   }
 }
