@@ -29,6 +29,13 @@ public class ChapterRepositoryImpl implements ChapterRepository {
   }
 
   @Override
+  public List<Chapter> findAllByStoryIdOrderByChapterNum(String storyId) {
+    return chapterJpaRepository.findAllByStoryIdOrderByChapterNum(storyId).stream()
+        .map(ChapterMapper::toDomain)
+        .toList();
+  }
+
+  @Override
   @Transactional
   public Chapter save(Chapter chapter) {
     ChapterEntity entity =

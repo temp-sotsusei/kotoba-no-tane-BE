@@ -29,6 +29,13 @@ public class FeedbackRepositoryImpl implements FeedbackRepository {
   }
 
   @Override
+  public List<Feedback> findAllByChapterIdIn(Iterable<String> chapterIds) {
+    return feedbackJpaRepository.findAllByChapterIdIn(chapterIds).stream()
+        .map(FeedbackMapper::toDomain)
+        .toList();
+  }
+
+  @Override
   @Transactional
   public Feedback save(Feedback feedback) {
     FeedbackEntity entity =

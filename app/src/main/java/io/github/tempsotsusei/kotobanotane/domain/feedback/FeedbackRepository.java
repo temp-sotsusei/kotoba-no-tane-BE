@@ -10,6 +10,9 @@ public interface FeedbackRepository {
 
   List<Feedback> findAll();
 
+  /** 章ID一覧に紐づくフィードバックをまとめて取得する。 */
+  List<Feedback> findAllByChapterIdIn(Iterable<String> chapterIds);
+
   Feedback save(Feedback feedback);
 
   void deleteById(String feedbackId);

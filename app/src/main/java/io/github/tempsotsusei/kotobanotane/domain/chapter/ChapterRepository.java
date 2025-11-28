@@ -10,6 +10,9 @@ public interface ChapterRepository {
 
   List<Chapter> findAll();
 
+  /** 指定した Story に紐づく章を章番号順に取得する。 */
+  List<Chapter> findAllByStoryIdOrderByChapterNum(String storyId);
+
   Chapter save(Chapter chapter);
 
   void deleteById(String chapterId);
