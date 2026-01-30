@@ -30,6 +30,7 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(
       HttpSecurity http, BearerTokenResolver bearerTokenResolver) throws Exception {
     http.csrf(csrf -> csrf.disable())
+        .cors(Customizer.withDefaults())
         .authorizeHttpRequests(
             authorize -> authorize.requestMatchers("/healthz").permitAll().anyRequest().permitAll())
         .oauth2ResourceServer(
